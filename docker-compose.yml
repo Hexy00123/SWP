@@ -1,0 +1,20 @@
+version: '3'
+services:
+  web:
+    build: .
+    command: python -u app.py
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/container
+    depends_on:
+      - db
+    networks:
+      - mynetwork
+  db:
+    image: mongo:latest
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
