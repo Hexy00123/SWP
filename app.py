@@ -44,21 +44,34 @@ def authorisation():
     return make_response(jsonify({}), 401)
 
 
-@app.route('/user', methods=['GET'])
+@app.route('/user', methods=['GET', 'PUT'])
 def get_user_data():
-    parameters = dict(request.args)
-    if "id" in parameters:
-        parameters["_id"] = ObjectId(parameters["id"])
-        del parameters["id"]
+    if request.method == 'GET':
+        parameters = dict(request.args)
+        if "id" in parameters:
+            parameters["_id"] = ObjectId(parameters["id"])
+            del parameters["id"]
 
-    print(parameters)
-    user = db.User.get(**parameters)
-    if user is not None:
-        return make_response(jsonify(user.jsonify()), 200)
-    return make_response(jsonify({}), 204)
+        print(parameters)
+        user = db.User.get(**parameters)
+        if user is not None:
+            return make_response(jsonify(user.jsonify()), 200)
+        return make_response(jsonify({}), 204)
+    elif request.method == 'PUT':
+        parameters = dict(request.args)
+
+        if "id" in parameters:
+            parameters["_id"] = ObjectId(parameters["id"])
+            del parameters["id"]
+
+        user = db.User.get_by_id(parameters['_id'])
+        if user is not None:
+            user.update(username=parameters['username'])
+            return make_response({}, 200)
+        return make_response({}, 204)
 
 
-@app.route('/location', methods=['GET', 'POST', 'PUSH', 'DELETE'])
+@app.route('/location', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def location():
     if request.method == 'GET':
         _id = ObjectId(request.args['id'])
@@ -72,6 +85,7 @@ def location():
         name = request.args["name"]
         description = request.args["description"]
         tags = list(map(int, request.args["tags"].strip().split(',')))
+        print(request.args['tags'], tags)
         location = list(map(float, request.args["location"].strip().split(',')))
 
         _id = db.Location.add(name=name,
@@ -87,10 +101,61 @@ def location():
                                 db.User.get_by_id(owner_id).suggested_locations + [_id])
 
         return make_response(jsonify(db.Location.get_by_id(_id).jsonify()), 201)
+
     elif request.method == 'PUT':
-        pass
+        _id = ObjectId(request.args['id'])
+        location = db.Location.get_by_id(_id)
+        if location is not None:
+            params = dict(request.args)
+            del params['id']
+
+            for key in params:
+                if key in {"name", "description"}:
+                    db.Location.update_instance(_id, key, params[key])
+                elif key == "location":
+                    db.Location.update_instance(_id, key, list(map(float, params[key])))
+                elif key == "tags":
+                    db.Location.update_instance(_id, key, list(map(int, params[key])))
+                else:
+                    return make_response("not allowed", 404)
+
+            if request.files:
+                db.Location.update_instance(_id, "images",
+                                            [db.Image.add(content=request.files[obj].read()) for obj in request.files])
+
+            return make_response({}, 200)
+        return make_response({}, 204)
+
     elif request.method == 'DELETE':
-        pass
+        _id = ObjectId(request.args['id'])
+        if db.Location.get_by_id(_id) is not None:
+            db.Location.remove_by_id(_id)
+            return make_response({}, 200)
+        return make_response({}, 204)
+
+
+@app.route('/nearest_locations', methods=['GET'])
+def nearest_locations():
+    def calculate_distance(longitude1, latitude1, longitude2, latitude2):
+        from math import radians, cos, sin, atan2, sqrt
+        radius = 6371000
+
+        lon1, lat1, lon2, lat2 = map(radians, [longitude1, latitude1, longitude2, latitude2])
+
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
+
+        # Haversine formula
+        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        distance = radius * c
+        return distance
+
+    radius = float(request.args['radius'])
+    user_location = list(map(float, request.args['coordinates'].split(',')))
+    return make_response(jsonify(list(map(lambda obj: obj.jsonify(), db.Location.find(
+        location=lambda loc: calculate_distance(*loc, *user_location) < radius)))), 200)
 
 
 @app.route('/image', methods=['GET'])

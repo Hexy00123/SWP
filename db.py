@@ -1,5 +1,4 @@
 from DataBase import *
-from flask import send_file
 
 
 class User:

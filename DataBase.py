@@ -87,6 +87,9 @@ class DBCollection():
             return self.factory.create_inst(**res)
         return None
 
+    def remove_by_id(self, id):
+        self.db_collection.remove({"_id": {"$eq": id}})
+
     def update_instance(self, id, key, value):
         self.db_collection.find_one_and_update({"_id": id}, {'$set': {key: value}})
 
