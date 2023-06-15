@@ -87,9 +87,12 @@ class DBCollection():
             return self.factory.create_inst(**res)
         return None
 
+    def update_instance(self, id, key, value):
+        self.db_collection.find_one_and_update({"_id": id}, {'$set': {key: value}})
+
 
 class DataBase():
-    BASE_TYPES = [ObjectId, int, float, str, bool]
+    BASE_TYPES = [ObjectId, int, float, str, bool, bytes]
     ITERABLE_TYPES = [list, tuple, dict, set]
 
     @staticmethod
