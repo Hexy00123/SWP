@@ -1,10 +1,35 @@
-from flask import Flask, request, jsonify, make_response, send_file
+from flask import Flask, request, jsonify, make_response, send_file, render_template
 import os
 from config import CONNECTION_STRING
-from db import db
-from bson import ObjectId
+from models import db
+from bson import ObjectId, errors
 import json
 import io
+
+
+def arg_checker(*allowed_args):
+    def wrapper(func):
+        def decorated_function():
+            params = dict(request.args)
+            for id in ['id', 'owner_id']:
+                if id in params:
+                    try:
+                        params[id] = ObjectId(params[id])
+                    except errors.InvalidId:
+                        return make_response(f'Wrong {id} value', 400)
+
+            wrong_arguments = set(params.keys()).difference(set(allowed_args))
+            if wrong_arguments:
+                return make_response(f'Wrong arguments: {", ".join(wrong_arguments)}', 400)
+
+            return func(**params)
+
+        decorated_function.__name__ = func.__name__
+
+        return decorated_function
+
+    return wrapper
+
 
 app = Flask(__name__)
 
@@ -15,9 +40,8 @@ def api_page():
 
 
 @app.route('/register', methods=['POST'])
-def registration():
-    username, email, password_hash = request.args["username"], request.args["email"], request.args["password_hash"]
-
+@arg_checker('username', 'email', 'password_hash')
+def register(username, email, password_hash):
     if db.User.get(email=email) is not None:
         return make_response(jsonify({}), 208)
 
@@ -32,8 +56,8 @@ def registration():
 
 
 @app.route('/auto', methods=['GET'])
-def authorisation():
-    email, password_hash = request.args["email"], request.args["password_hash"]
+@arg_checker('email', 'password_hash')
+def authorisation(email, password_hash):
     response = db.User.get(email=email)
     if response is None:
         return make_response(jsonify({}), 204)
@@ -45,97 +69,86 @@ def authorisation():
 
 
 @app.route('/user', methods=['GET', 'PUT'])
-def get_user_data():
-    if request.method == 'GET':
-        parameters = dict(request.args)
-        if "id" in parameters:
-            parameters["_id"] = ObjectId(parameters["id"])
-            del parameters["id"]
-
-        print(parameters)
-        user = db.User.get(**parameters)
-        if user is not None:
-            return make_response(jsonify(user.jsonify()), 200)
+@arg_checker('id', 'username')
+def user_route(id, username=None):
+    user = db.User.get_by_id(id)
+    if user is None:
         return make_response(jsonify({}), 204)
-    elif request.method == 'PUT':
-        parameters = dict(request.args)
 
-        if "id" in parameters:
-            parameters["_id"] = ObjectId(parameters["id"])
-            del parameters["id"]
-
-        user = db.User.get_by_id(parameters['_id'])
-        if user is not None:
-            user.update(username=parameters['username'])
-            return make_response({}, 200)
-        return make_response({}, 204)
-
-
-@app.route('/location', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def location():
     if request.method == 'GET':
-        _id = ObjectId(request.args['id'])
-        location = db.Location.get_by_id(_id)
-        if location:
-            return make_response(location.jsonify(), 200)
-        return make_response({}, 204)
-
-    elif request.method == 'POST':
-        owner_id = ObjectId(request.args["owner_id"])
-        name = request.args["name"]
-        description = request.args["description"]
-        tags = list(map(int, request.args["tags"].strip().split(',')))
-        print(request.args['tags'], tags)
-        location = list(map(float, request.args["location"].strip().split(',')))
-
-        _id = db.Location.add(name=name,
-                              description=description,
-                              images=[db.Image.add(content=request.files[obj].read()) for obj in request.files],
-                              comments=[],
-                              location=location,
-                              rating=[0, 0],
-                              tags=tags,
-                              owner_id=owner_id)
-
-        db.User.update_instance(owner_id, 'suggested_locations',
-                                db.User.get_by_id(owner_id).suggested_locations + [_id])
-
-        return make_response(jsonify(db.Location.get_by_id(_id).jsonify()), 201)
+        return make_response(jsonify(user.jsonify()), 200)
 
     elif request.method == 'PUT':
-        _id = ObjectId(request.args['id'])
-        location = db.Location.get_by_id(_id)
-        if location is not None:
-            params = dict(request.args)
-            del params['id']
+        db.User.update_instance(id=id, key='username', value=username)
+        return make_response({}, 200)
 
-            for key in params:
-                if key in {"name", "description"}:
-                    db.Location.update_instance(_id, key, params[key])
-                elif key == "location":
-                    db.Location.update_instance(_id, key, list(map(float, params[key])))
-                elif key == "tags":
-                    db.Location.update_instance(_id, key, list(map(int, params[key])))
-                else:
-                    return make_response("not allowed", 404)
 
-            if request.files:
-                db.Location.update_instance(_id, "images",
-                                            [db.Image.add(content=request.files[obj].read()) for obj in request.files])
+@app.route('/location', methods=['GET'])
+@arg_checker('id')
+def location_get(id):
+    location = db.Location.get_by_id(id)
+    if location:
+        return make_response(location.jsonify(), 200)
+    return make_response({}, 204)
 
-            return make_response({}, 200)
+
+# TODO: debug
+@app.route('/location', methods=['POST'])
+@arg_checker('owner_id', 'name', 'description', 'tags', 'location')
+def location_post(owner_id, name, description, tags, location):
+    tags = list(map(int, tags.strip().split(',')))
+    location = list(map(float, location.strip().split(',')))
+
+    _id = db.Location.add(name=name,
+                          description=description,
+                          images=[db.Image.add(content=request.files[obj].read()) for obj in request.files],
+                          comments=[],
+                          location=location,
+                          rating=[0, 0],
+                          tags=tags,
+                          owner_id=owner_id)
+
+    db.User.update_instance(owner_id, 'suggested_locations',
+                            db.User.get_by_id(owner_id).suggested_locations + [_id])
+
+    return make_response(jsonify(db.Location.get_by_id(_id).jsonify()), 201)
+
+
+@app.route('/location', methods=['PUT'])
+@arg_checker('id', 'name', 'description', 'location', 'tags')
+def location_put(id, name=None, description=None, location=None, tags=None):
+    if db.Location.get_by_id(id) is None:
+        return make_response(jsonify({}), 204)
+
+    if name:
+        db.Location.update_instance(id, 'name', name)
+    if description:
+        db.Location.update_instance(id, 'description', description)
+    if location:
+        db.Location.update_instance(id, 'location', list(map(float, location.split(','))))
+    if tags:
+        db.Location.update_instance(id, 'tags', list(map(int, tags.split(','))))
+
+    if request.files:
+        db.Location.update_instance(id, "images",
+                                    [db.Image.add(content=request.files[obj].read()) for obj in request.files])
+
+    return make_response({}, 200)
+
+
+@app.route('/location', methods=['DELETE'])
+@arg_checker('id')
+def location_delete(id):
+    if db.Location.get_by_id(id) is None:
         return make_response({}, 204)
 
-    elif request.method == 'DELETE':
-        _id = ObjectId(request.args['id'])
-        if db.Location.get_by_id(_id) is not None:
-            db.Location.remove_by_id(_id)
-            return make_response({}, 200)
-        return make_response({}, 204)
+    db.Location.remove_by_id(id)
+    return make_response({}, 200)
 
 
 @app.route('/nearest_locations', methods=['GET'])
-def nearest_locations():
+@arg_checker('radius', 'coordinates')
+def nearest_locations(radius, coordinates):
     def calculate_distance(longitude1, latitude1, longitude2, latitude2):
         from math import radians, cos, sin, atan2, sqrt
         radius = 6371000
@@ -152,37 +165,53 @@ def nearest_locations():
         distance = radius * c
         return distance
 
-    radius = float(request.args['radius'])
-    user_location = list(map(float, request.args['coordinates'].split(',')))
+    radius = float(radius)
+    user_location = list(map(float, coordinates.split(',')))
     return make_response(jsonify(list(map(lambda obj: obj.jsonify(), db.Location.find(
         location=lambda loc: calculate_distance(*loc, *user_location) < radius)))), 200)
 
 
 @app.route('/image', methods=['GET'])
-def get_image():
-    _id = ObjectId(request.args['id'])
-    img = db.Image.get_by_id(_id)
-    if img is not None:
-        return send_file(
-            io.BytesIO(img.content),
-            mimetype='image/jpg',
-            as_attachment=True,
-            download_name=f'{request.args["id"]}.jpg')
-    return make_response({}, 204)
+@arg_checker('id')
+def image(id):
+    img = db.Image.get_by_id(id)
+    if img is None:
+        return make_response({}, 204)
+
+    return send_file(
+        io.BytesIO(img.content),
+        mimetype='image/jpg',
+        as_attachment=True,
+        download_name=f'{request.args["id"]}.jpg')
 
 
 @app.route('/admin/users', methods=['GET'])
-def admin_get_all_users():
+@arg_checker()
+def admin_users():
     return make_response(jsonify([user.jsonify() for user in db.User.find()]))
 
 
+@app.route('/admin/users/show', methods=['GET'])
+@arg_checker()
+def admin_users_show():
+    return render_template('users.html', users=list(map(lambda us: us.jsonify(), db.User.find())))
+
+
 @app.route('/admin/locations', methods=['GET'])
-def admin_get_all_locations():
+@arg_checker()
+def admin_locations():
     return make_response(jsonify([location.jsonify() for location in db.Location.find()]))
 
 
+@app.route('/admin/locations/show', methods=['GET'])
+@arg_checker()
+def admin_locations_show():
+    return render_template('locations.html', locations=list(map(lambda loc: loc.jsonify(), db.Location.find())))
+
+
 @app.route('/admin/images', methods=['GET'])
-def admin_get_all_images():
+@arg_checker()
+def admin_images():
     return make_response(jsonify([image.id() for image in db.Image.find()]))
 
 
