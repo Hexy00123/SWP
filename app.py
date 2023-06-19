@@ -92,7 +92,6 @@ def location_get(id):
     return make_response({}, 204)
 
 
-# TODO: debug
 @app.route('/location', methods=['POST'])
 @arg_checker('owner_id', 'name', 'description', 'tags', 'location')
 def location_post(owner_id, name, description, tags, location):

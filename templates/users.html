@@ -2,6 +2,19 @@
 <html>
 <head>
     <title>User List</title>
+    <button onclick="GetURL()">
+        Switch to locations
+    </button>
+    <p id="url"></p>
+
+    <script>
+        function GetURL() {
+            var gfg = window.location.href.replace("users", "locations");
+            window.location.replace(gfg)
+            document.getElementById("url").innerHTML = gfg;
+        }
+    </script>
+
     <style>
         body {
             font-family: Arial, sans-serif;

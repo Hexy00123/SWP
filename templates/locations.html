@@ -2,6 +2,18 @@
 <html>
 <head>
     <title>Location List</title>
+    <button onclick="GetURL()">
+        Switch to users
+    </button>
+    <p id="url"></p>
+
+    <script>
+        function GetURL() {
+            var gfg = window.location.href.replace("locations", "users");
+            window.location.replace(gfg)
+            document.getElementById("url").innerHTML = gfg;
+        }
+    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -93,18 +105,18 @@
     </script>
 </head>
 <body>
-    <h1>Location List</h1>
+<h1>Location List</h1>
 
-    {% for location in locations %}
-    <div class="location-card">
-        <h2>{{ location.name }}</h2>
+{% for location in locations %}
+<div class="location-card">
+    <h2>{{ location.name }}</h2>
 
-        <table>
-            {% for field, value in location.items() %}
-            <tr>
-                <th class="field">
-                    <span class="field-name">{{ field.capitalize() }}</span>
-                    <span class="field-value">
+    <table>
+        {% for field, value in location.items() %}
+        <tr>
+            <th class="field">
+                <span class="field-name">{{ field.capitalize() }}</span>
+                <span class="field-value">
                         {% if field == "location" %}
                             {{ value[0] }}, {{ value[1] }}
                         {% elif value is iterable and value is not string %}
@@ -117,11 +129,11 @@
                             {{ value }}
                         {% endif %}
                     </span>
-                </th>
-            </tr>
-            {% endfor %}
-        </table>
-    </div>
-    {% endfor %}
+            </th>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endfor %}
 </body>
 </html>
