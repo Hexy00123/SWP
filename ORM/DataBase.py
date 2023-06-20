@@ -102,6 +102,9 @@ class DBCollection():
 
         return res.where(**kwargs)
 
+    def __iter__(self):
+        return iter(self.find())
+
     def get(self, **kwargs):
         '''
         Description: Retrieves a single object from the collection based on the provided criteria.
