@@ -1,6 +1,6 @@
 from ORM.DataBase import *
 
-db = DataBase("WebApplication")
+db = DataBase("WebApplication", CONNECTION_STRING)
 
 
 class User:
@@ -33,8 +33,15 @@ class Image:
     content: bytes
 
 
+class Rating:
+    user_id: ObjectId
+    object_id: ObjectId
+    is_positive: bool
+
+
 db.add_collection(User)
 db.add_collection(Location)
 db.add_collection(Comment)
 db.add_collection(Image)
+db.add_collection(Rating)
 db.build()

@@ -174,13 +174,13 @@ class DataBase():
         else:
             raise TypeError(f"Unknown type(s) for db: {dtype}")
 
-    def __init__(self, name):
+    def __init__(self, name, connection_string):
         '''
         # Description: Initializes a database instance.
         # Parameters:
         #   - name: The name of the database.
         '''
-        self.client = pymongo.MongoClient(CONNECTION_STRING)
+        self.client = pymongo.MongoClient(connection_string)
         self.db = self.client.get_database(name)
         self.dtypes = []
         self.collections = dict()
