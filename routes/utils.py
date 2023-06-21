@@ -1,5 +1,6 @@
 from bson import ObjectId, errors
 from flask import request, make_response
+from inspect import signature
 
 
 def arg_checker(*allowed_args):
@@ -21,8 +22,8 @@ def arg_checker(*allowed_args):
             try:
                 res = func(**params)
             except TypeError as e:
-                text = str(e).split('positional arguments:')[1]
-                return make_response(f'missed arguments: {text}', 400)
+                given_args = params.keys()
+                return make_response(f'missed arguments: {set(allowed_args).difference(given_args)}', 400)
 
             return res
 
