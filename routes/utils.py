@@ -18,7 +18,13 @@ def arg_checker(*allowed_args):
                 return make_response(f'Wrong arguments: {", ".join(wrong_arguments)}\n'
                                      f'Allowed arguments: {", ".join(allowed_args)}', 400)
 
-            return func(**params)
+            try:
+                res = func(**params)
+            except TypeError as e:
+                text = str(e).split('positional arguments:')[1]
+                return make_response(f'missed arguments: {text}', 400)
+
+            return res
 
         decorated_function.__name__ = func.__name__
 
