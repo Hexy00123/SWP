@@ -6,7 +6,7 @@ def arg_checker(*allowed_args):
     def wrapper(func):
         def decorated_function():
             params = dict(request.args)
-            for id in ['id', 'owner_id', 'user_id', 'object_id']:
+            for id in ['id', 'owner_id', 'user_id', 'object_id', 'location_id']:
                 if id in params:
                     try:
                         params[id] = ObjectId(params[id])

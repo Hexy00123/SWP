@@ -34,16 +34,56 @@ def authorisation(email, password_hash):
     return make_response(jsonify({}), 401)
 
 
-@users_blueprint.route('/user', methods=['GET', 'PUT'])
-@arg_checker('id', 'username')
-def user_route(id, username=None):
+@users_blueprint.route('/user', methods=['GET'])
+@arg_checker('id')
+def user_get(id):
     user = db.User.get_by_id(id)
     if user is None:
         return make_response(jsonify({}), 204)
+    response = user.jsonify()
+    del response['password_hash']
+    return make_response(jsonify(response), 200)
 
-    if request.method == 'GET':
-        return make_response(jsonify(user.jsonify()), 200)
 
-    elif request.method == 'PUT':
-        db.User.update_instance(id=id, key='username', value=username)
-        return make_response({}, 200)
+@users_blueprint.route('/user', methods=['PUT'])
+@arg_checker('id', 'username')
+def user_update(id, username):
+    user = db.User.get_by_id(id)
+    if user is None:
+        return make_response(jsonify({}), 204)
+    db.User.update_instance(id=id, key='username', value=username)
+    return make_response({}, 200)
+
+
+@users_blueprint.route('/favorites', methods=['POST'])
+@arg_checker('id', 'location_id')
+def add_location_to_favorites(id, location_id):
+    user = db.User.get_by_id(id)
+    location = db.Location.get_by_id(location_id)
+
+    if user is None or location is None:
+        return make_response(jsonify({}), 204)
+
+    if location_id in user.favorite_locations:
+        return make_response(jsonify({}), 208)
+
+    db.User.update_instance(id, 'favorite_locations', user.favorite_locations + [location_id])
+    return make_response(jsonify({}), 201)
+
+
+@users_blueprint.route('/favorites', methods=['DELETE'])
+@arg_checker('id', 'location_id')
+def delete_location_from_favorites(id, location_id):
+    user = db.User.get_by_id(id)
+    location = db.Location.get_by_id(location_id)
+
+    if user is None or location is None:
+        return make_response(jsonify({}), 204)
+
+    if location_id not in user.favorite_locations:
+        return make_response(jsonify({}), 204)
+
+    user_favorites = user.favorite_locations
+    user_favorites.remove(location_id)
+    db.User.update_instance(id, 'favorite_locations', user_favorites)
+    return make_response(jsonify({}), 201)

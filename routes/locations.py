@@ -54,7 +54,7 @@ def location_put(id, name=None, description=None, location=None, tags=None):
         db.Location.update_instance(id, "images",
                                     [db.Image.add(content=request.files[obj].read()) for obj in request.files])
 
-    return make_response({}, 200)
+    return make_response(jsonify(db.Location.get_by_id(id)), 200)
 
 
 @locations_blueprint.route('/location', methods=['DELETE'])
