@@ -17,11 +17,12 @@ def admin_users_show():
     return render_template('users.html', users=list(map(lambda us: us.jsonify(), db.User.find())))
 
 
-@admins_blueprint.route('/admin/users', methods=['DELETE'])
-@arg_checker()
-def admin_users_delete():
-    for user in db.User:
-        db.User.remove_by_id(user._id)
+@admins_blueprint.route('/admin/user', methods=['DELETE'])
+@arg_checker('id')
+def admin_users_delete(id):
+    if db.User.get_by_id(id) is None:
+        return make_response(jsonify({}), 204)
+    db.User.remove_by_id(id)
     return make_response(jsonify({}), 200)
 
 
@@ -37,11 +38,12 @@ def admin_locations_show():
     return render_template('locations.html', locations=list(map(lambda loc: loc.jsonify(), db.Location.find())))
 
 
-@admins_blueprint.route('/admin/locations', methods=['DELETE'])
-@arg_checker()
-def admin_locations_delete():
-    for loc in db.Location:
-        db.Location.remove_by_id(loc._id)
+@admins_blueprint.route('/admin/location', methods=['DELETE'])
+@arg_checker('id')
+def admin_locations_delete(id):
+    if db.Location.get_by_id(id) is None:
+        return make_response(jsonify({}), 204)
+    db.Location.remove_by_id(id)
     return make_response(jsonify({}), 200)
 
 
@@ -51,11 +53,11 @@ def admin_images():
     return make_response(jsonify([image.id() for image in db.Image.find()]), 200)
 
 
-@admins_blueprint.route('/admin/images', methods=['DELETE'])
-@arg_checker()
-def admin_images_delete():
-    for img in db.Images:
-        db.Image.remove_by_id(img._id)
+@admins_blueprint.route('/admin/image', methods=['DELETE'])
+@arg_checker('id')
+def admin_images_delete(id):
+    if db.Image.get_by_id(id) is None:
+        return make_response(jsonify({}), 204)
     return make_response(jsonify({}), 200)
 
 
