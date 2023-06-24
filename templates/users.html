@@ -2,16 +2,24 @@
 <html>
 <head>
     <title>User List</title>
-    <button onclick="GetURL()">
-        Switch to locations
-    </button>
-    <p id="url"></p>
-
     <script>
-        function GetURL() {
-            var gfg = window.location.href.replace("users", "locations");
-            window.location.replace(gfg)
-            document.getElementById("url").innerHTML = gfg;
+        function removeUser(userId) {
+            var route = window.location.href.replace("users/show", "/user?id=" + userId);
+            fetch(route, {
+                method: 'DELETE',
+            })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('User ' + userId + ' deleted successfully');
+
+                    } else {
+                        console.log('Error deleting user');
+                    }
+                })
+                .catch(error => {
+                    console.log('Error:', error);
+                });
+
         }
     </script>
 
@@ -85,8 +93,13 @@
 <h1>User List</h1>
 
 {% for user in users %}
-<div class="user-card">
+<div class="user-card" id={{user.id}}>
     <h2>{{ user.username }}</h2>
+
+    <button onclick="removeUser('{{ user.id }}')">
+        remove
+    </button>
+
 
     <table>
         <tr>
@@ -146,5 +159,6 @@
     </table>
 </div>
 {% endfor %}
+
 </body>
 </html>
