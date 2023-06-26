@@ -1,4 +1,4 @@
-from routes.utils import arg_checker
+from routes.utils import validator, user_authorisation
 from flask import Blueprint, make_response, jsonify, render_template, request
 from models import *
 
@@ -6,7 +6,7 @@ locations_blueprint = Blueprint('locations', __name__)
 
 
 @locations_blueprint.route('/location', methods=['GET'])
-@arg_checker('id')
+@validator('id')
 def location_get(id):
     location = db.Location.get_by_id(id)
     if location:
@@ -15,8 +15,9 @@ def location_get(id):
 
 
 @locations_blueprint.route('/location', methods=['POST'])
-@arg_checker('owner_id', 'name', 'description', 'tags', 'location')
-def location_post(owner_id, name, description, tags, location):
+@validator('owner_id', 'name', 'description', 'tags', 'location', 'password',
+           validation_methods=[(user_authorisation, {'user_id': 'id', 'password': 'password'})])
+def location_post(owner_id, name, description, tags, location, password):
     tags = list(map(int, tags.strip().split(',')))
     location = list(map(float, location.strip().split(',')))
 
@@ -36,7 +37,7 @@ def location_post(owner_id, name, description, tags, location):
 
 
 @locations_blueprint.route('/location', methods=['PUT'])
-@arg_checker('id', 'name', 'description', 'location', 'tags')
+@validator('id', 'name', 'description', 'location', 'tags')
 def location_put(id, name=None, description=None, location=None, tags=None):
     if db.Location.get_by_id(id) is None:
         return make_response(jsonify({}), 204)
@@ -58,7 +59,7 @@ def location_put(id, name=None, description=None, location=None, tags=None):
 
 
 @locations_blueprint.route('/location', methods=['DELETE'])
-@arg_checker('id')
+@validator('id')
 def location_delete(id):
     if db.Location.get_by_id(id) is None:
         return make_response({}, 204)
@@ -68,7 +69,7 @@ def location_delete(id):
 
 
 @locations_blueprint.route('/nearest_locations', methods=['GET'])
-@arg_checker('radius', 'coordinates')
+@validator('radius', 'coordinates')
 def nearest_locations(radius, coordinates):
     from routes.utils import calculate_distance
 
@@ -79,7 +80,7 @@ def nearest_locations(radius, coordinates):
 
 
 @locations_blueprint.route('/image', methods=['GET'])
-@arg_checker('id')
+@validator('id')
 def image(id):
     img = db.Image.get_by_id(id)
     if img is None:

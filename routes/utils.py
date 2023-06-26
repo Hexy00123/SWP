@@ -1,9 +1,17 @@
 from bson import ObjectId, errors
 from flask import request, make_response
 from inspect import signature
+from models import db
+import hashlib
 
 
-def arg_checker(*allowed_args):
+class ValidationException(Exception):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.return_code = 400
+
+
+def validator(*allowed_args: str, validation_methods: list[tuple[callable, dict]] = None):
     def wrapper(func):
         def decorated_function():
             params = dict(request.args)
@@ -19,13 +27,24 @@ def arg_checker(*allowed_args):
                 return make_response(f'Wrong arguments: {", ".join(wrong_arguments)}\n'
                                      f'Allowed arguments: {", ".join(allowed_args)}', 400)
 
-            try:
-                res = func(**params)
-            except TypeError as e:
-                given_args = params.keys()
-                return make_response(f'missed arguments: {set(allowed_args).difference(given_args)}', 400)
+            missed_arguments = set(allowed_args).difference(params.keys())
+            if missed_arguments:
+                return make_response(f'missed arguments: {missed_arguments}', 400)
 
-            return res
+            if validation_methods:
+                for method in validation_methods:
+                    checker, arguments = method
+                    arguments = arguments.copy()
+                    for argname, request_key in arguments.items():
+                        arguments[argname] = params[request_key]
+
+                    try:
+                        checker(**arguments)
+                    except ValidationException as e:
+                        print(str(e))
+                        return make_response(str(e), e.return_code)
+
+            return func(**params)
 
         decorated_function.__name__ = func.__name__
 
@@ -49,3 +68,18 @@ def calculate_distance(longitude1, latitude1, longitude2, latitude2):
 
     distance = radius * c
     return distance
+
+
+def user_authorisation(user_id, password):
+    user = db.User.get_by_id(user_id)
+    if user is not None:
+        if user.password_hash == hashlib.md5(password.encode()).hexdigest():
+            return
+
+        err = ValidationException('Wrong password: authorisation is prohibited')
+        err.return_code = 401
+        raise err
+
+    err = ValidationException('User does not exist')
+    err.return_code = 204
+    raise err

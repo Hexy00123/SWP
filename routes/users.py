@@ -1,19 +1,20 @@
-from routes.utils import arg_checker
+from routes.utils import validator, user_authorisation
 from flask import Blueprint, make_response, jsonify, render_template, request
 from models import *
+import hashlib
 
 users_blueprint = Blueprint('users', __name__)
 
 
 @users_blueprint.route('/register', methods=['POST'])
-@arg_checker('username', 'email', 'password')
+@validator('username', 'email', 'password')
 def register(username, email, password):
     if db.User.get(email=email) is not None:
         return make_response(jsonify({}), 208)
 
     db.User.add(username=username,
                 email=email,
-                password_hash=hash(password),
+                password_hash=hashlib.md5(password.encode()).hexdigest(),
                 favorite_locations=[],
                 suggested_locations=[],
                 rating=[0, 0])
@@ -22,20 +23,20 @@ def register(username, email, password):
 
 
 @users_blueprint.route('/auto', methods=['GET'])
-@arg_checker('email', 'password')
+@validator('email', 'password')
 def authorisation(email, password):
     response = db.User.get(email=email)
     if response is None:
         return make_response(jsonify({}), 204)
 
-    if db.User.get(email=email).password_hash == hash(password):
+    if db.User.get(email=email).password_hash == hashlib.md5(password.encode()).hexdigest():
         return make_response(jsonify({"id": response.id(),
                                       "email": response.email}), 200)
     return make_response(jsonify({}), 401)
 
 
 @users_blueprint.route('/user', methods=['GET'])
-@arg_checker('id')
+@validator('id')
 def user_get(id):
     user = db.User.get_by_id(id)
     if user is None:
@@ -46,8 +47,9 @@ def user_get(id):
 
 
 @users_blueprint.route('/user', methods=['PUT'])
-@arg_checker('id', 'username')
-def user_update(id, username):
+@validator('id', 'username', 'password',
+           validation_methods=[(user_authorisation, {'user_id': 'id', 'password': 'password'})])
+def change_username(id, username, password):
     user = db.User.get_by_id(id)
     if user is None:
         return make_response(jsonify({}), 204)
@@ -56,8 +58,9 @@ def user_update(id, username):
 
 
 @users_blueprint.route('/favorites', methods=['POST'])
-@arg_checker('id', 'location_id')
-def add_location_to_favorites(id, location_id):
+@validator('id', 'location_id', 'password',
+           validation_methods=[(user_authorisation, {'user_id': 'id', 'password': 'password'})])
+def add_location_to_favorites(id, location_id, password):
     user = db.User.get_by_id(id)
     location = db.Location.get_by_id(location_id)
 
@@ -72,8 +75,9 @@ def add_location_to_favorites(id, location_id):
 
 
 @users_blueprint.route('/favorites', methods=['DELETE'])
-@arg_checker('id', 'location_id')
-def delete_location_from_favorites(id, location_id):
+@validator('id', 'location_id', 'password',
+           validation_methods=[(user_authorisation, {'user_id': 'id', 'password': 'password'})])
+def remove_location_from_favorites(id, location_id, password):
     user = db.User.get_by_id(id)
     location = db.Location.get_by_id(location_id)
 
