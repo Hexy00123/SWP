@@ -16,7 +16,7 @@ def location_get(id):
 
 @locations_blueprint.route('/location', methods=['POST'])
 @validator('owner_id', 'name', 'description', 'tags', 'location', 'password',
-           validation_methods=[(user_authorisation, {'user_id': 'id', 'password': 'password'})])
+           validation_methods=[(user_authorisation, {'user_id': 'owner_id', 'password': 'password'})])
 def location_post(owner_id, name, description, tags, location, password):
     tags = list(map(int, tags.strip().split(',')))
     location = list(map(float, location.strip().split(',')))
