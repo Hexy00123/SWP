@@ -1,4 +1,4 @@
-from routes.utils import arg_checker
+from routes.utils import validator, user_authorisation
 from flask import Blueprint, make_response, jsonify, render_template, request
 from models import *
 
@@ -6,8 +6,9 @@ rating_blueprint = Blueprint('rating', __name__)
 
 
 @rating_blueprint.route('/rate', methods=['POST'])
-@arg_checker('user_id', 'object_id', 'is_positive')
-def put_rating(user_id, object_id, is_positive):
+@validator('user_id', 'object_id', 'is_positive', 'password',
+           validation_methods=[(user_authorisation, {'user_id': 'owner_id', 'password': 'password'})])
+def put_rating(user_id, object_id, is_positive, password):
     if is_positive.lower() == 'true':
         is_positive = True
     elif is_positive.lower() == 'false':
