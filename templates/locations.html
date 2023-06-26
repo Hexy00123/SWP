@@ -2,9 +2,7 @@
 <html>
 <head>
     <title>Location List</title>
-    <button onclick="GetURL()">
-        Switch to users
-    </button>
+
     <p id="url"></p>
 
     <script>
@@ -28,6 +26,20 @@
             border-radius: 4px;
             padding: 16px;
             margin-bottom: 16px;
+        }
+
+        .header {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+
+        }
+
+        .header_text {
+            display: block;
+            margin-right: 20px;
+
         }
 
         h2 {
@@ -90,23 +102,15 @@
         }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
-    <script>
-        function initMap(lat, lng) {
-            var location = {lat: parseFloat(lat), lng: parseFloat(lng)};
-            var map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 15,
-                center: location
-            });
-            var marker = new google.maps.Marker({
-                position: location,
-                map: map
-            });
-        }
-    </script>
 </head>
 <body>
-<h1>Location List</h1>
+<div class="header">
+<h1 class="header_text">Location List</h1>
 
+<button onclick="GetURL()">
+    Switch to users
+</button>
+</div>
 {% for location in locations %}
 <div class="location-card">
     <h2>{{ location.name }}</h2>
