@@ -11,7 +11,7 @@ class ValidationException(Exception):
         self.return_code = 400
 
 
-def validator(*allowed_args: str, validation_methods: list[tuple[callable, dict]] = None):
+def validator(*allowed_args: str, validation_methods: list[tuple[callable, tuple]] = None):
     def wrapper(func):
         def decorated_function():
             params = dict(request.args)
@@ -34,12 +34,13 @@ def validator(*allowed_args: str, validation_methods: list[tuple[callable, dict]
             if validation_methods:
                 for method in validation_methods:
                     checker, arguments = method
-                    arguments = arguments.copy()
-                    for argname, request_key in arguments.items():
-                        arguments[argname] = params[request_key]
+                    args = []
+                    for request_key in arguments:
+                        args.append(params[request_key])
 
                     try:
-                        checker(**arguments)
+                        print(args)
+                        checker(*args)
                     except ValidationException as e:
                         print(str(e))
                         return make_response(str(e), e.return_code)

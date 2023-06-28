@@ -48,7 +48,7 @@ def user_get(id):
 
 @users_blueprint.route('/user', methods=['PUT'])
 @validator('id', 'username', 'password',
-           validation_methods=[(user_authorisation, {'user_id': 'id', 'password': 'password'})])
+           validation_methods=[(user_authorisation, ('id', 'password'))])
 def change_username(id, username, password):
     user = db.User.get_by_id(id)
     if user is None:
@@ -59,7 +59,7 @@ def change_username(id, username, password):
 
 @users_blueprint.route('/favorites', methods=['POST'])
 @validator('id', 'location_id', 'password',
-           validation_methods=[(user_authorisation, {'user_id': 'id', 'password': 'password'})])
+           validation_methods=[(user_authorisation, ('id', 'password'))])
 def add_location_to_favorites(id, location_id, password):
     user = db.User.get_by_id(id)
     location = db.Location.get_by_id(location_id)
@@ -76,7 +76,7 @@ def add_location_to_favorites(id, location_id, password):
 
 @users_blueprint.route('/favorites', methods=['DELETE'])
 @validator('id', 'location_id', 'password',
-           validation_methods=[(user_authorisation, {'user_id': 'id', 'password': 'password'})])
+           validation_methods=[(user_authorisation, ('id', 'password'))])
 def remove_location_from_favorites(id, location_id, password):
     user = db.User.get_by_id(id)
     location = db.Location.get_by_id(location_id)

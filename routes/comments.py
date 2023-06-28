@@ -7,7 +7,7 @@ comment_blueprint = Blueprint('comments', __name__)
 
 @comment_blueprint.route('/comment', methods=['POST'])
 @validator('location_id', 'owner_id', 'content', 'password',
-           validation_methods=[(user_authorisation, {'user_id': 'owner_id', 'password': 'password'})])
+           validation_methods=[(user_authorisation, ('owner_id', 'password'))])
 def create_comment(location_id, owner_id, content, password):
     location, user = db.Location.get_by_id(location_id), db.User.get_by_id(owner_id)
     if location is None or user is None:
