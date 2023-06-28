@@ -59,7 +59,7 @@ def authorisation(email, password):
 @users_blueprint.route('/user', methods=['GET'])
 @validator('id', 'password',
            validation_methods=[(user_authorisation, ('id', 'password'))])
-def user_get(id):
+def user_get(id, password):
     """
     Retrieve user information.
 
