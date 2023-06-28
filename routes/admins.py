@@ -1,6 +1,7 @@
 from routes.utils import validator
 from flask import Blueprint, make_response, jsonify, render_template, request
 from models import *
+import base64
 
 admins_blueprint = Blueprint('admins', __name__)
 
@@ -45,6 +46,21 @@ def admin_users_delete(id):
         return make_response({}, 204)
     db.User.remove_by_id(id)
     return make_response({}, 200)
+
+
+@admins_blueprint.route('/admin/location/<location_id>', methods=['GET'])
+def admin_location(location_id):
+    location = db.Location.get_by_id(ObjectId(location_id))
+
+    images = [db.Image.get_by_id(img) for img in location.images]
+    for image in images:
+        image.content = base64.b64encode(image.content).decode('utf-8')
+
+    return render_template('location_card.html',
+                           location=location,
+                           comments=[db.Comment.get_by_id(comment).jsonify() for comment in location.comments],
+                           images=images
+                           )
 
 
 @admins_blueprint.route('/admin/locations', methods=['GET'])
