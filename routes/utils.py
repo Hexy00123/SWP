@@ -112,14 +112,30 @@ def user_authorisation(user_id, password):
         ValidationException: If the user ID or password is incorrect.
     """
     user = db.User.get_by_id(user_id)
-    if user is not None:
-        if user.password_hash == hashlib.md5(password.encode()).hexdigest():
-            return
-
-        err = ValidationException('Wrong password: authorisation is prohibited')
-        err.return_code = 401
+    if user is None:
+        err = ValidationException('User does not exist')
+        err.return_code = 204
         raise err
 
-    err = ValidationException('User does not exist')
-    err.return_code = 204
+    if user.password_hash == hashlib.md5(password.encode()).hexdigest():
+        return
+
+    err = ValidationException('Wrong password: authorisation is prohibited')
+    err.return_code = 401
+    raise err
+
+
+def authorise_location_owner(location_id, password):
+    location = db.Location.get_by_id(location_id)
+    if location is None:
+        err = ValidationException('Location does not exist')
+        err.return_code = 204
+        raise err
+
+    user = db.User.get_by_id(location.owner_id)
+    if user.password_hash == hashlib.md5(password.encode()).hexdigest():
+        return
+
+    err = ValidationException('Wrong password: authorisation is prohibited')
+    err.return_code = 401
     raise err
