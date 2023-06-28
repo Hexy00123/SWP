@@ -6,12 +6,31 @@ import hashlib
 
 
 class ValidationException(Exception):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    """
+    Custom exception class for validation errors.
+    """
+
+    def __init__(self, *args):
+        super().__init__(*args)
         self.return_code = 400
 
 
 def validator(*allowed_args: str, validation_methods: list[tuple[callable, tuple]] = None):
+    """
+    Decorator for request parameter validation.
+
+    Args:
+        allowed_args (str): Allowed argument names.
+        validation_methods (list[tuple[callable, tuple]], optional): List of validation methods to apply. Each tuple
+            contains a callable validation function and the corresponding argument names to validate.
+
+    Returns:
+        The decorated function.
+
+    Raises:
+        ValidationException: If any validation fails.
+    """
+
     def wrapper(func):
         def decorated_function():
             params = dict(request.args)
@@ -39,10 +58,8 @@ def validator(*allowed_args: str, validation_methods: list[tuple[callable, tuple
                         args.append(params[request_key])
 
                     try:
-                        print(args)
                         checker(*args)
                     except ValidationException as e:
-                        print(str(e))
                         return make_response(str(e), e.return_code)
 
             return func(**params)
@@ -55,6 +72,18 @@ def validator(*allowed_args: str, validation_methods: list[tuple[callable, tuple
 
 
 def calculate_distance(longitude1, latitude1, longitude2, latitude2):
+    """
+    Calculate the distance between two coordinates using the Haversine formula.
+
+    Args:
+        longitude1 (float): The longitude of the first coordinate.
+        latitude1 (float): The latitude of the first coordinate.
+        longitude2 (float): The longitude of the second coordinate.
+        latitude2 (float): The latitude of the second coordinate.
+
+    Returns:
+        The distance between the coordinates in meters.
+    """
     from math import radians, cos, sin, atan2, sqrt
     radius = 6371000
 
@@ -72,6 +101,16 @@ def calculate_distance(longitude1, latitude1, longitude2, latitude2):
 
 
 def user_authorisation(user_id, password):
+    """
+    Perform user authorization.
+
+    Args:
+        user_id (str): The ID of the user.
+        password (str): The password of the user.
+
+    Raises:
+        ValidationException: If the user ID or password is incorrect.
+    """
     user = db.User.get_by_id(user_id)
     if user is not None:
         if user.password_hash == hashlib.md5(password.encode()).hexdigest():

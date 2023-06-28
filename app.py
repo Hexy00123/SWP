@@ -8,6 +8,12 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def api_page():
+    """
+    API endpoint that returns the API page.
+
+    Returns:
+        str: The API page message.
+    """
     return "API page"
 
 

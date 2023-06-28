@@ -25,6 +25,9 @@ class Factory:
             def id(obj):
                 return str(obj._id)
 
+            def pure_type(obj):
+                return obj.__class__.mro()[1]
+
             def __str__(obj):
                 return f"{str(self.dtype.__name__)}: {'{'}{', '.join([f'{field}={getattr(obj, field)}' for field in self.dtype.__annotations__])}{'}'}"
 
