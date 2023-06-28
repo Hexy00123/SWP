@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Location</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}">
+
+<body>
+<div class="location-card">
+    <div class="header">
+        <h2>{{ location.name }} ( {{location._id}} )</h2>
+    </div>
+    <div class="field">
+        <span class="field-name">Owner:</span>
+        <span class="field-value">{{ location.owner_id }}</span>
+    </div>
+    <div class="field">
+        <span class="field-name">Description:</span>
+        <span class="field-value">{{ location.description }}</span>
+    </div>
+    <div class="field">
+        <span class="field-name">Rating:</span>
+        <span class="field-value">{{ location.rating }}</span>
+    </div>
+    <div class="field">
+        <span class="field-name">Tags:</span>
+        <ul class="field-value">
+            {% for tag in location.tags %}
+            <li>{{ tag }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="field">
+        <span class="field-name">Location:</span>
+        <span class="field-value">{{ location.location }}</span>
+    </div>
+    <hr>
+    <hr>
+    <div class="field">
+        <span class="field-name">Comments:</span>
+        <ul>
+            {% for comment in comments %}
+            <li>
+                <div class="field">
+                    <span class="field-name">from: </span>
+                    <span class="field-value">{{comment.owner_id}} </span>
+                </div>
+                <div class="field">
+                    <span class="field-name">content: </span>
+                    <span class="field-value">{{ comment.content }}</span>
+                </div>
+                <div class="field">
+                    <span class="field-name">comment id: </span>
+                    <span class="field-value">{{ comment.id }}</span>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <hr>
+    <hr>
+    <div class="field">
+        <span class="field-name">Images:</span>
+        <div class="image-container">
+            {% for image in images %}
+            <img src="data:image/png;base64,{{ image.content }}" alt="Image" class="responsive-image">
+            {% endfor %}
+        </div>
+    </div>
+
+
+</div>
+
+</body>
+</html>
