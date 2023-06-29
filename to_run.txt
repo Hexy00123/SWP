@@ -1,0 +1,8 @@
+docker build -t opentravel-img .
+docker network create mynetwork
+
+//docker run --name opentravel opentravel-img
+docker-compose up -d
+//docker run --name mongo-express mongo-express
+
+wsl --shutdown

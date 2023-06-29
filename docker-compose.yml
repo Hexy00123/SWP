@@ -1,10 +1,10 @@
-version: '3'
+version: '3.8'
 services:
   web:
-    build: .
+    image: opentravel-img
     command: python -u app.py
     ports:
-      - "5000:5000"
+      - 5000:5000
     volumes:
       - .:/container
     depends_on:
@@ -13,8 +13,27 @@ services:
       - mynetwork
   db:
     image: mongo:latest
+    container_name: mongodb
+    ports:
+      - 27017:27017
+    volumes:
+      - ./database-data:/data/db
     networks:
       - mynetwork
 
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    ports:
+      - 8080:8081
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=db
+      - ME_CONFIG_BASICAUTH_USERNAME=root
+      - ME_CONFIG_BASICAUTH_PASSWORD=root
+    networks:
+      - mynetwork
+
+
 networks:
   mynetwork:
+    driver: bridge

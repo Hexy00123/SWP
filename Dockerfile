@@ -5,7 +5,7 @@ EXPOSE 27017
 
 COPY . /app
 WORKDIR /app
-RUN pip3 install Flask
-RUN pip3 install pymongo
+RUN pip install Flask
+RUN pip install pymongo
 
 CMD [ "python3", "app.py" ]
