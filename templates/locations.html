@@ -9,6 +9,15 @@
             window.location.replace(gfg)
             document.getElementById("url").innerHTML = gfg;
         }
+
+        function openLocation(location_id) {
+            var newURL = window.location.href.replace("locations/show", "location/" + location_id);
+            console.log(newURL)
+            window.location.replace(newURL)
+            document.getElementById("url").innerHTML = newURL;
+
+
+        }
     </script>
 
 <body>
@@ -21,7 +30,13 @@
 </div>
 {% for location in locations %}
 <div class="location-card">
-    <h2>{{ location.name }}</h2>
+    <div class="header">
+        <h2 class="header_text">{{ location.name }}</h2>
+
+        <button class="header_text" onclick="openLocation('{{ location.id }}')">
+            open card
+        </button>
+    </div>
 
     <table>
         {% for field, value in location.items() %}
