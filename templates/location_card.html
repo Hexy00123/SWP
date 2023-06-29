@@ -3,11 +3,24 @@
 <head>
     <title>Location</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}">
+    <script>
+        function backToLocations() {
+            var locationsURL = "http://" + window.location.host + "/admin/locations/show";
+            document.getElementById("url").innerHTML = locationsURL;
+            window.location.replace(locationsURL);
+        }
+    </script>
 
 <body>
+<p id="url"></p>
+
 <div class="location-card">
     <div class="header">
         <h2>{{ location.name }} ( {{location._id}} )</h2>
+
+        <button onclick="backToLocations()">
+            Back to locations
+        </button>
     </div>
     <div class="field">
         <span class="field-name">Owner:</span>
@@ -53,6 +66,7 @@
                     <span class="field-value">{{ comment.id }}</span>
                 </div>
             </li>
+            <br> <br>
             {% endfor %}
         </ul>
     </div>
