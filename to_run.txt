@@ -6,5 +6,6 @@ docker network create mynetwork
 docker-compose up
 // now all the three containers should be running
 // (if mongo-express container doesn't run, wait a bit and launch it)
+// if mongo express doesn't require authorization, try to clear cookies or restart the browser
 
 //wsl --shutdown

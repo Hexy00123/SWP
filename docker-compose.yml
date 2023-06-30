@@ -35,7 +35,6 @@ services:
       - VCAP_APP_HOST=0.0.0.0
     networks:
       - mynetwork
-    command: mongo-express --basicAuth.username=root --basicAuth.password=root
 
 
 networks:
