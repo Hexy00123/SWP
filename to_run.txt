@@ -1,0 +1,7 @@
+//docker system prune
+
+docker-compose up
+
+// if mongo express doesn't require authorization, try to clear cookies or restart the browser
+
+//wsl --shutdown
