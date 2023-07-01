@@ -1,29 +1,29 @@
 version: '3.8'
 services:
   web:
-    image: opentravel-img
-    command: python -u app.py
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./database-data:/database-data
     ports:
       - 5000:5000
-    volumes:
-      - .:/container
-    depends_on:
-      - db
     networks:
       - mynetwork
+    depends_on:
+      - db
   db:
     image: mongo:latest
     container_name: mongodb
     ports:
       - 27017:27017
-    volumes:
-      - ./database-data:/data/db
     networks:
       - mynetwork
 
   mongo-express:
     image: mongo-express:latest
     container_name: mongo-express
+    restart: always
     ports:
       - 8080:8081
     environment:
@@ -35,7 +35,6 @@ services:
       - VCAP_APP_HOST=0.0.0.0
     networks:
       - mynetwork
-
 
 networks:
   mynetwork:
