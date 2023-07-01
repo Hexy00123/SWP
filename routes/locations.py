@@ -1,6 +1,7 @@
 from routes.utils import validator, user_authorisation
-from flask import Blueprint, make_response, jsonify, render_template, request
+from flask import Blueprint, make_response, jsonify, render_template, request, send_file
 from models import *
+import io
 
 locations_blueprint = Blueprint('locations', __name__)
 
