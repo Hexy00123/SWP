@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Location</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}">
+    <script src="{{url_for('static', filename='script/index.js')}}"></script>
+
+<body>
+<div class="location-card">
+    <div class="header">
+        <h2>Admin authorisation</h2>
+    </div>
+
+    <div class="location-card">
+        <form>
+            <p> username </p>
+            <input type="text" id="username" name="username">
+            <br>
+            <p> password</p>
+            <input type="text" id="password" name="password">
+        </form>
+        <br>
+        <button onclick="adminLogin(document.getElementById('username').value, document.getElementById('password').value)">
+            login
+        </button>
+    </div>
+
+</div>
+</body>
+</html>

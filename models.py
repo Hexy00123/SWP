@@ -85,9 +85,15 @@ class Rating:
     is_positive: bool
 
 
+class Moderator:
+    username: str
+    password_hash: str
+
+
 db.add_collection(User)
 db.add_collection(Location)
 db.add_collection(Comment)
 db.add_collection(Image)
 db.add_collection(Rating)
+db.add_collection(Moderator)
 db.build()

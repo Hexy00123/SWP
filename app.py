@@ -17,7 +17,7 @@ def api_page():
 
 
 if __name__ == '__main__':
-    from routes import users, admins, locations, rating, comments
+    from routes import users, locations, rating, comments, admins
 
     app.register_blueprint(admins.admins_blueprint)
     app.register_blueprint(users.users_blueprint)

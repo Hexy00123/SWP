@@ -4,8 +4,11 @@
     <p id="url"></p>
 
     <title>User List</title>
-    <script src="{{url_for('static', filename='script/index.js')}}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}">
+    <script src="{{url_for('static', filename='script/index.js')}}"></script>
+    <script>
+        window.onload = adminAuth;
+    </script>
 </head>
 <body>
 <div class="header">
