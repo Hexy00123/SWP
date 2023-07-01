@@ -1,6 +1,7 @@
-from routes.utils import validator, user_authorisation, authorise_location_owner
-from flask import Blueprint, make_response, jsonify, render_template, request
+from routes.utils import validator, user_authorisation
+from flask import Blueprint, make_response, jsonify, render_template, request, send_file
 from models import *
+import io
 
 locations_blueprint = Blueprint('locations', __name__)
 
@@ -60,9 +61,8 @@ def location_post(owner_id, name, description, tags, location, password):
 
 
 @locations_blueprint.route('/location', methods=['PUT'])
-@validator('id', 'name', 'description', 'location', 'tags', 'password',
-           validation_methods=[(authorise_location_owner, ('id', 'password'))])
-def location_put(id, name, description, location, tags, password):
+@validator('id', 'name', 'description', 'location', 'tags')
+def location_put(id, name=None, description=None, location=None, tags=None):
     """
     Update an existing location.
 
@@ -96,9 +96,8 @@ def location_put(id, name, description, location, tags, password):
 
 
 @locations_blueprint.route('/location', methods=['DELETE'])
-@validator('id', 'password',
-           validation_methods=[(authorise_location_owner, ('id', 'password'))])
-def location_delete(id, password):
+@validator('id')
+def location_delete(id):
     """
     Delete a location by its ID.
 
@@ -108,21 +107,8 @@ def location_delete(id, password):
     Returns:
         Flask response: Empty response with status code indicating success or failure.
     """
-    location = db.Location.get_by_id(id)
     if db.Location.get_by_id(id) is None:
         return make_response({}, 204)
-
-    for image_id in location.images:
-        db.Image.remove_by_id(image_id)
-
-    for commend_id in location.comments:
-        db.Comment.remove_by_id(commend_id)
-
-    owner = db.User.get_by_id(location.owner_id)
-    rating = owner.rating
-    rating[0] -= location.rating[0]
-    rating[1] -= location.rating[1]
-    db.User.update_instance(owner._id, 'rating', rating)
 
     db.Location.remove_by_id(id)
     return make_response({}, 200)

@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify, make_response, send_file, render_template
 import os
 import json
-import io
 
 app = Flask(__name__)
 
