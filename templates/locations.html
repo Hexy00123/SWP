@@ -3,28 +3,13 @@
 <head>
     <title>Location List</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}">
-    <script>
-        function GetURL() {
-            var gfg = window.location.href.replace("locations", "users");
-            window.location.replace(gfg)
-            document.getElementById("url").innerHTML = gfg;
-        }
-
-        function openLocation(location_id) {
-            var newURL = window.location.href.replace("locations/show", "location/" + location_id);
-            console.log(newURL)
-            window.location.replace(newURL)
-            document.getElementById("url").innerHTML = newURL;
-
-
-        }
-    </script>
+    <script src="{{url_for('static', filename='script/index.js')}}"></script>
 
 <body>
 <div class="header">
     <h1 class="header_text">Location List</h1>
 
-    <button onclick="GetURL()">
+    <button onclick="redirectToUsers()">
         Switch to users
     </button>
 </div>

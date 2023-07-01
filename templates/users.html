@@ -4,39 +4,14 @@
     <p id="url"></p>
 
     <title>User List</title>
-    <script>
-        function removeUser(userId) {
-            var route = window.location.href.replace("users/show", "/user?id=" + userId);
-            fetch(route, {
-                method: 'DELETE',
-            })
-                .then(response => {
-                    if (response.ok) {
-                        console.log('User ' + userId + ' deleted successfully');
-                        window.location.reload()
-                    } else {
-                        console.log('Error deleting user');
-                    }
-                })
-                .catch(error => {
-                    console.log('Error:', error);
-                });
-
-        }
-
-        function GetURL() {
-            var gfg = window.location.href.replace("users", "locations");
-            window.location.replace(gfg)
-            document.getElementById("url").innerHTML = gfg;
-        }
-    </script>
+    <script src="{{url_for('static', filename='script/index.js')}}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}">
 </head>
 <body>
 <div class="header">
     <h1 class="header_text">User List</h1>
 
-    <button onclick="GetURL()">
+    <button onclick="redirectToLocations()">
         Switch to locations
     </button>
 </div>
