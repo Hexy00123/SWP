@@ -73,6 +73,12 @@ function adminAuth() {
     var username = localStorage.getItem('username');
     var password = localStorage.getItem('password');
 
+    if (username === null || password === null) {
+        window.location.replace('/admin');
+        console.log('Authorisation is prohibited');
+        return;
+    }
+
     fetch('/admin/authorisation?username=' + username.toString() + '&password=' + password.toString(), {
         method: 'GET',
     })
