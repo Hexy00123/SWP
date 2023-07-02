@@ -87,3 +87,44 @@ function adminAuth() {
             console.log('Error:', error);
         });
 }
+
+function putImage(ll) {
+    console.log(ll)
+    var container = document.getElementById('mapContainer');
+
+// Create an image element
+    var image = new Image();
+
+// Specify the API parameters
+    var apiParams = {
+        apikey: '33b156f1-7891-48be-a9b1-ade66a6b9f70',
+        lang: 'en',
+        l: 'map',
+        ll: ll,
+        z: 17,
+        pt: ll + ',pm2rdm'
+    };
+
+// Construct the query string from the API parameters
+    var queryString = Object.keys(apiParams)
+        .map(key => key + '=' + encodeURIComponent(apiParams[key]))
+        .join('&');
+
+// Construct the URL with the API endpoint and the query string
+    var apiUrl = 'https://static-maps.yandex.ru/1.x/?' + queryString;
+
+// Make the request to Yandex.StaticMaps API using Fetch API
+    fetch(apiUrl)
+        .then(response => response.blob())
+        .then(blob => {
+            // Create an object URL for the blob
+            // Set the image source to the object URL
+            image.src = URL.createObjectURL(blob);
+
+            // Add the image to the container element
+            container.appendChild(image);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}

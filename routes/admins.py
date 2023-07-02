@@ -162,6 +162,7 @@ def admin_location(location_id):
 
     return render_template('location_card.html',
                            location=location,
+                           location_str = str(location.location[0])+','+str(location.location[1]),
                            comments=[db.Comment.get_by_id(comment).jsonify() for comment in location.comments],
                            images=images
                            )
