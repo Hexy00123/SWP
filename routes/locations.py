@@ -61,8 +61,9 @@ def location_post(owner_id, name, description, tags, location, password):
 
 
 @locations_blueprint.route('/location', methods=['PUT'])
-@validator('id', 'name', 'description', 'location', 'tags')
-def location_put(id, name=None, description=None, location=None, tags=None):
+@validator('id', 'name', 'description', 'location', 'tags', 'password',
+           validation_methods=[(user_authorisation, ('owner_id', 'password'))])
+def location_put(id, name, description, location, tags, password):
     """
     Update an existing location.
 
@@ -96,7 +97,8 @@ def location_put(id, name=None, description=None, location=None, tags=None):
 
 
 @locations_blueprint.route('/location', methods=['DELETE'])
-@validator('id')
+@validator('id', 'password',
+           validation_methods=[(user_authorisation, ('owner_id', 'password'))])
 def location_delete(id):
     """
     Delete a location by its ID.
