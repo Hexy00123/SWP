@@ -65,6 +65,7 @@ def validator(*allowed_args: str, validation_methods: list[tuple[callable, tuple
             return func(**params)
 
         decorated_function.__name__ = func.__name__
+        decorated_function.__setattr__('__inner_function', func)
 
         return decorated_function
 
