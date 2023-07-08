@@ -44,6 +44,12 @@ def get_comment(id):
         Flask response: JSON response containing the comment object.
     """
     comment = db.Comment.get_by_id(id)
+    user = db.User.get_by_id(comment.owner_id)
     if comment is None:
         return make_response({}, 204)
-    return make_response(jsonify(comment.jsonify()), 200)
+    response = comment.jsonify()
+    if user:
+        response['username'] = user.username
+    else:
+        response['username'] = 'deleted account'
+    return make_response(jsonify(response), 200)
