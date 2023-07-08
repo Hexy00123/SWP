@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Location List</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}">
+    <script src="{{url_for('static', filename='script/index.js')}}"></script>
+    <script>
+        window.onload = adminAuth;
+    </script>
+
+<body>
+<div class="header">
+    <h1 class="header_text">Tickets List</h1>
+</div>
+
+<div class="location-card">
+    {% for ticket in data %}
+
+    <table>
+        <tr>
+            <th class="field">
+                <span class="field-name"> Ticket id: </span>
+                <span class="field-value"> {{ ticket.id() }}</span>
+            </th>
+
+            <th class="field">
+                <span class="field-name"> Location id: </span>
+                <span class="field-value"> {{ ticket.location_id }}</span>
+            </th>
+
+            <th class="field">
+                <span class="field-name"> Updates(raw): </span>
+                <span class="field-value"> {{ ticket.updates }}</span>
+            </th>
+
+            <th class="field">
+                <button onclick="openTicket('{{ticket.id()}}')">
+                    Open
+                </button>
+            </th>
+        </tr>
+
+    </table>
+    {% endfor %}
+
+</div>
+</body>
+</html>

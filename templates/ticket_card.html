@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ticket</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="{{url_for('static', filename='script/index.js')}}"></script>
+    <script>
+        window.onload = adminAuth;
+    </script>
+<body>
+<p id="url"></p>
+
+<div class="location-card">
+    <button type="button" class="btn btn-dark btn-sm" onclick="backToTickets()">Back to tickets</button>
+
+    <h5>Ticket: {{ticket.id()}} </h5>
+
+    <h5>
+        {% if "name" in ticket.updates:%}
+        <input type="checkbox" id="name">
+        <s style="text-decoration: red line-through">{{location.name}}</s>
+        <font style="color: #0c8037">{{ticket.updates["name"]}} </font>
+        {% else: %}
+        {{location.name}}
+        {% endif %}
+    </h5>
+
+    <div class="field">
+        <span class="field-name">Owner:</span>
+        <span class="field-value">{{ location.owner_id }}</span>
+    </div>
+
+    <div class="field">
+        <span class="field-name">Description:</span>
+        <span class="field-value">
+            {% if "description" in ticket.updates:%}
+            <input type="checkbox" id="description">
+            <s style="text-decoration: red line-through">{{location.description}}</s>
+            <font style="color: #0c8037">{{ticket.updates["description"]}} </font>
+            {% else: %}
+            {{location.description}}
+            {% endif %}
+        </span>
+    </div>
+
+    <div class="field">
+        <span class="field-name">Rating:</span>
+        <span class="field-value">{{ location.rating }}</span>
+    </div>
+
+    <div class="field">
+        <span class="field-name">Tags:</span>
+        <span class="field-value">
+            {% if "tags" in ticket.updates:%}
+            <input type="checkbox" id="tags">
+            <s style="text-decoration: red line-through">{{location.tags}}</s>
+            <font style="color: #0c8037">{{ticket.updates["tags"]}} </font>
+            {% else: %}
+            {{location.tags}}
+            {% endif %}
+        </span>
+    </div>
+
+    <div class="field">
+        <span class="field-name">Location:</span>
+        <span class="field-value">
+            {% if "location" in ticket.updates:%}
+            <input type="checkbox" id="location">
+            <s style="text-decoration: red line-through">{{location.location}}</s>
+            <font style="color: #0c8037">{{ticket.updates["location"]}} </font>
+            {% else: %}
+            {{location.location}}
+            {% endif %}
+        </span>
+    </div>
+
+    <button type="button" class="btn btn-success" onclick="acceptTicket('{{ticket.id()}}')">
+        Accept
+    </button>
+    <button type="button" class="btn btn-danger" onclick="rejectTicket('{{ticket.id()}}')">
+        Reject
+    </button>
+
+</div>
+
+
+</body>
+</html>

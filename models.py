@@ -90,10 +90,16 @@ class Moderator:
     password_hash: str
 
 
+class Ticket:
+    location_id: str
+    updates: dict
+
+
 db.add_collection(User)
 db.add_collection(Location)
 db.add_collection(Comment)
 db.add_collection(Image)
 db.add_collection(Rating)
 db.add_collection(Moderator)
+db.add_collection(Ticket)
 db.build()

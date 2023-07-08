@@ -13,6 +13,13 @@ function openLocation(location_id) {
     document.getElementById("url").innerHTML = newURL;
 }
 
+function openTicket(ticket_id) {
+    var newURL = window.location.href.replace("tickets", "ticket/" + ticket_id);
+    console.log(newURL)
+    window.location.replace(newURL)
+    document.getElementById("url").innerHTML = newURL;
+}
+
 // Removes a user by sending a DELETE request to the server with the user ID.
 function removeUser(userId) {
     var route = window.location.href.replace("users/show", "/user?id=" + userId);
@@ -45,6 +52,13 @@ function backToLocations() {
     document.getElementById("url").innerHTML = locationsURL;
     window.location.replace(locationsURL);
 }
+
+function backToTickets() {
+    var locationsURL = "http://" + window.location.host + "/admin/tickets";
+    document.getElementById("url").innerHTML = locationsURL;
+    window.location.replace(locationsURL);
+}
+
 
 // Performs an admin login by sending a GET request to the server with the username and password.
 function adminLogin(username, password) {
@@ -133,4 +147,24 @@ function putImage(ll) {
         .catch(error => {
             console.error('Error:', error);
         });
+}
+
+function acceptTicket(ticket_id) {
+    let ids = ["name", "description", "tags", "location"];
+    let updates = {};
+
+    for (let i = 0; i < ids.length; i++) {
+        const el = document.getElementById(ids[i]);
+        if (el) {
+            updates[ids[i]] = el.checked;
+        }
+    }
+
+    fetch(origin + '/admin/ticket?id=' + ticket_id, {method: "PUT", body: JSON.stringify(updates)});
+    backToTickets();
+}
+
+function rejectTicket(ticket_id) {
+    fetch(origin + '/admin/ticket?id=' + ticket_id, {method: "DELETE"});
+    backToTickets();
 }

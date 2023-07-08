@@ -17,12 +17,13 @@ def api_page():
 
 
 if __name__ == '__main__':
-    from routes import users, locations, rating, comments, admins
+    from routes import users, locations, rating, comments, admins, tickets
 
     app.register_blueprint(admins.admins_blueprint)
     app.register_blueprint(users.users_blueprint)
     app.register_blueprint(locations.locations_blueprint)
     app.register_blueprint(rating.rating_blueprint)
     app.register_blueprint(comments.comment_blueprint)
+    app.register_blueprint(tickets.tickets_blueprint)
 
     app.run(host='0.0.0.0', port=os.environ.get("PORT", 5000))
