@@ -92,6 +92,7 @@ def process_ticket(id):
 
 
 @tickets_blueprint.route('/admin/ticket', methods=['DELETE'])
+@validator('id')
 def remove_ticket(id):
     ticket = db.Ticket.get_by_id(ObjectId(id))
     if ticket is None:
