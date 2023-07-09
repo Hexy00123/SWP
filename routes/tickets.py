@@ -1,6 +1,6 @@
 import bson.json_util
 
-from routes.utils import validator, user_authorisation
+from routes.utils import validator, authorise_moderator
 from flask import Blueprint, make_response, jsonify, render_template, request
 from models import *
 from bson import errors
@@ -10,9 +10,31 @@ tickets_blueprint = Blueprint('tickets', __name__)
 
 
 @tickets_blueprint.route('/admin/ticket', methods=['POST'])
-@validator('location_id', 'modername', 'password', 'updates')
-def create_ticket():
-    pass
+@validator('location_id', 'modername', 'password',
+           validation_methods=[(authorise_moderator, ('modername', 'password'))])
+def create_ticket(location_id, modername, password):
+    updates = loads(request.data.decode())
+
+    location = db.Location.get_by_id(location_id)
+    if location is None:
+        return make_response({}, 204)
+
+    allowed_updates = {'name': str,
+                       'description': str,
+                       'tags': list,
+                       'location': list}
+
+    for update_key in updates:
+        if update_key not in allowed_updates:
+            return make_response(f"Field: {update_key} is not allowed", 400)
+
+        if type(updates[update_key]) is not allowed_updates[update_key]:
+            return make_response(f"Field: {update_key} has wrong type: \n"
+                                 f"expected: {allowed_updates[update_key].__name__}\n"
+                                 f"given: {type(updates[update_key]).__name__}")
+
+    db.Ticket.add(location_id=location_id, updates=updates)
+    return make_response({}, 201)
 
 
 @tickets_blueprint.route('/admin/tickets', methods=['GET'])

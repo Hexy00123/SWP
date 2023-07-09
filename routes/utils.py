@@ -140,3 +140,18 @@ def authorise_location_owner(location_id, password):
     err = ValidationException('Wrong password: authorisation is prohibited')
     err.return_code = 401
     raise err
+
+
+def authorise_moderator(modername, password):
+    moder = db.Moderator.get(username=modername)
+    if moder is None:
+        err = ValidationException('Moderator does not exist')
+        err.return_code = 204
+        raise err
+
+    if moder.password_hash == hashlib.md5(password.encode()).hexdigest():
+        return
+
+    err = ValidationException('Wrong password: authorisation is prohibited')
+    err.return_code = 401
+    raise err
