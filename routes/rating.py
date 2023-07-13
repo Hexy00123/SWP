@@ -66,3 +66,13 @@ def rate_object(user_id, object_id, is_positive, password):
         db.Comment.update_instance(object_id, 'rating', obj_rating)
 
     return make_response({}, 201)
+
+
+@rating_blueprint.route('/is_liked', methods=['GET'])
+@validator('id', 'object_id')
+def is_liked(id, object_id):
+    obj = db.Rating.get(user_id=id, object_id=object_id)
+    if obj is None:
+        return make_response({}, 204)
+
+    return make_response(jsonify(obj.jsonify()), 200)
